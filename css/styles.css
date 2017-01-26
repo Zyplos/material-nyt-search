@@ -1,0 +1,37 @@
+/* Title padding fix */
+
+#logo-title {
+    padding-left: 20px;
+}
+
+@media only screen and (max-width: 992px) {
+#logo-title {
+    padding-left: 0px;
+}
+}
+
+
+/* */
+
+::-webkit-scrollbar-track {
+ background-color: #CCCCCC;
+}
+
+::-webkit-scrollbar {
+ width: 10px;
+ background-color: #CCCCCC;
+}
+
+::-webkit-scrollbar-thumb {
+ background-color: #ff3e3e;
+}
+/* Sticky footer */
+
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+main {
+    flex: 1 0 auto;
+}

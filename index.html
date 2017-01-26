@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Articles Search | New York Times</title>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link type="text/css" rel="stylesheet" href="css/mcss.css" media="screen,projection"/>
+        <link href="css/styles.css" rel="stylesheet" type="text/css">
+        <style>
+            body,
+            html {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .taglist {
+                bottom: 0;
+            }
+            main {
+                margin-top: 30px;
+            }
+            .progress {
+                background-color: #737373;
+            }
+            .progress .indeterminate {
+                background-color: #D9D9D9;
+            }
+            #loader {
+                display: none;
+            }
+            #hitstext {
+                display: none;
+            }
+            .card-title {
+                background-color: rgba(0, 0, 0, 0.8);
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <nav class="grey darken-4">
+                <div class="nav-wrapper">
+                    <a href="#!" class="brand-logo" id="logo-title">New York Times</a>
+                </div>
+            </nav>
+        </header>
+        <main>
+            <div class="container">
+                <div class="row">
+                    <div class="input-field col s12 m9">
+                        <input id="articleInput" type="text">
+                        <label for="articleInput" id="searchlabel">Search Articles</label>
+                    </div>
+                    <div class="col s12 m3">
+                        <button class="waves-effect waves-light grey darken-3 btn" style="margin-top: 20px" id="submit">Search</button>
+                    </div>
+                </div>
+                <p class="grey-text" id="hitstext">
+                    <span id="hitsnum"></span>
+                    articles found.</p>
+                <div class="progress" id="loader">
+                    <div class="indeterminate"></div>
+                </div>
+                <div class="container" id="main"></div>
+            </div>
+        </main>
+        <br><br>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+        <script>
+            var url = "https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=d4be826864fc45b1a232c1d429b6383e";
+            //
+            function createCard(data) {
+                $("#hitsnum").text(data.response.meta.hits);
+                $("#hitstext").fadeIn();
+                var articles = data.response.docs;
+                var leadparagraph;
+                for (var i = 0; i < articles.length; i++) {
+                    //
+                    if (!articles[i].lead_paragraph) {
+                        leadparagraph = '<span class="grey-text">Open article on the New York Times to read.</span>';
+                    } else {
+                        leadparagraph = articles[i].lead_paragraph;
+                    }
+                    //
+                    var pubDateFull = articles[i].pub_date;
+                    var pubDate = pubDateFull.split("T");
+                    var pubDateFinal = pubDate[0].split("-");
+                    var authorline;
+                    if (!articles[i].byline) {
+                        authorline = '';
+                    } else {
+                        authorline = '<p class="grey-text">' + articles[i].byline.original + ' on ' + pubDateFinal[1] + '/' + pubDateFinal[2] + '/' + pubDateFinal[0] + '</p>';
+                    }
+                    //
+                    //
+                    if (articles[i].multimedia) {
+                        if (articles[i].multimedia["1"]) {
+                            $("#main").append('<div class="card"> <div class="card-image"> <img src="http://nytimes.com/' + articles[i].multimedia["1"].url + '"> <span class="card-title">' + articles[i].headline.main + '</span> </div> <div class="card-content">' + authorline + '<p>' + leadparagraph + '</p></div><div class="card-action"> <a href="' + articles[i].web_url + '" target="_blank">Open in New York Times</a> </div></div>');
+                        } else {
+                            $("#main").append('<div class="card"><div class="card-content"><h3 class="flow-text">' + articles[i].headline.main + '</h3>' + authorline + '<p>' + leadparagraph + '</p></div><div class="card-action"> <a href="' + articles[i].web_url + '" target="_blank">Open in New York Times</a> </div></div>');
+                        }
+                    } else {
+                        $("#main").append('<div class="card"><div class="card-content"><h3 class="flow-text">' + articles[i].headline.main + '</h3>' + authorline + '<p>' + leadparagraph + '</p></div><div class="card-action"> <a href="' + articles[i].web_url + '" target="_blank">Open in New York Times</a> </div></div>');
+                    }
+                    //
+                    //
+                }
+            }
+            //
+            function searchData() {
+                $("#hitstext").fadeOut();
+                $("#loader").css("display", "block");
+                $("#main").empty();
+                var input = $("#articleInput").val();
+                url += "&q=\"" + input + "\"";
+                //
+                $.ajax({url: url, method: 'GET'}).done(function (result) {
+                    $("#loader").css("display", "none");
+                    //console.log(result);
+                    createCard(result);
+                }).fail(function (err) {
+                    $("#loader").css("display", "none");
+                    Materialize.toast('An error has occured. Check console.', 4000);
+                    throw err;
+                });
+            }
+            //
+            $(document).keypress(function (e) {
+                if (e.which == 13) {
+                    searchData();
+                }
+            });
+            //
+            $("#submit").click(function () {
+                searchData();
+            });
+        </script>
+    </body>
+</html>
